@@ -9,65 +9,7 @@ The fix is pretty easy. If you have correctly installed your node by passing `--
 ## How to run
 You can deploy this fixer by running following yaml on 
 ```
-apiVersion: apps/v1  
-kind: Deployment  
-metadata:  
-  namespace: kube-system  
-  name: flannel-fixer-deployment  
-  labels:  
-  app: flannel-fixer  
-spec:  
-  replicas: 1  
-  selector:  
-  matchLabels:  
-  app: flannel-fixer  
-  template:  
-  metadata:  
-  labels:  
-  app: flannel-fixer  
-    spec:  
-  serviceAccountName: flannel-fixer  
-      tolerations:  
- - key: "node-role.kubernetes.io/master"  
-  operator: "Exists"  
-  containers:  
- - name: flannel-fixer  
-          image: "alekcander/k3s-flannel-fixer:0.0.1"  
-  command:  
- - flannel-fixer  
-          ports:  
- - containerPort: 2112  
-              name: metrics  
----  
-apiVersion: v1  
-kind: ServiceAccount  
-metadata:  
-  name: flannel-fixer  
-  namespace: kube-system  
----  
-apiVersion: rbac.authorization.k8s.io/v1  
-kind: ClusterRole  
-metadata:  
-  name: flannel-fixer  
-  namespace: kube-system  
-rules:  
- - apiGroups: [""] # "" indicates the core API group  
-  resources: ["nodes"]  
-  verbs: ["get", "watch", "list","update"]  
----  
-apiVersion: rbac.authorization.k8s.io/v1  
-kind: ClusterRoleBinding  
-metadata:  
-  namespace: kube-system  
-  name: flannel-fixer-role-binding  
-roleRef:  
-  kind: ClusterRole  
-  name: flannel-fixer  
-  apiGroup: rbac.authorization.k8s.io  
-subjects:  
- - kind: ServiceAccount  
-    name: flannel-fixer  
-    namespace: kube-system
+kubectl apply -f https://raw.githubusercontent.com/alekc-go/flannel-fixer/master/deployment.yaml
 ```
 ## Configuration
 you should not need to touch these for pod functionality, but still they are 
