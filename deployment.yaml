@@ -21,7 +21,7 @@ spec:
           operator: "Exists"
       containers:
         - name: flannel-fixer
-          image: "alekcander/k3s-flannel-fixer:0.0.1"
+          image: "alekcander/k3s-flannel-fixer:0.0.2"
           command:
             - flannel-fixer
           ports:
