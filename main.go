@@ -114,12 +114,26 @@ func main() {
 }
 
 func updateNode(node *coreV1.Node) {
-	publicIP, ok := node.Labels[externalIPLabel]
-	logEntry := log.Info().Str("node_name", node.Name)
-	if !ok {
-		logEntry.Msg(fmt.Sprintf("node doesn't have %s label, skipping", externalIPLabel))
-		return
+	publicIP := ""
+	for _, nodeAddress := range node.Status.Addresses {
+		if nodeAddress.Type == coreV1.NodeExternalIP {
+			publicIP = nodeAddress.Address
+			break
+		}
 	}
+	logEntry := log.Info().Str("node_name", node.Name)
+
+	if publicIP == "" {
+		//fallback on k3s label
+		var ok bool
+		publicIP, ok = node.Labels[externalIPLabel]
+		if !ok {
+			logEntry.Msg(fmt.Sprintf("node doesn't have public address or %s label, skipping", externalIPLabel))
+			return
+		}
+	}
+	logEntry.Str("public_ip", publicIP)
+
 	flannelPublicIP := getValueFromMap(flannelPublicIPLabel, node.Annotations)
 	flannelPublicIPOverride := getValueFromMap(flannelPublicIPOverrideLabel, node.Annotations)
 	logEntry.Str("public_ip", publicIP).
